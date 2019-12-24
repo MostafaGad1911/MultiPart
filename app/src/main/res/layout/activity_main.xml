@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@color/colorWhite"
+    tools:context=".MainActivity">
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/pickImg"
+        android:layout_width="@dimen/_110sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:background="@color/colorBlueMidnight"
+        android:text="PICK IMG"
+        android:textColor="@color/colorWhite"
+        android:textStyle="bold"
+        android:textAllCaps="true"
+        />
+
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/uploadImg"
+        android:layout_width="@dimen/_110sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:background="@color/colorBlueMidnight"
+        android:text="Upload"
+        android:textColor="@color/colorWhite"
+        android:textStyle="bold"
+        android:textAllCaps="true"
+        android:layout_marginTop="@dimen/_10sdp"
+        />
+
+</LinearLayout>
