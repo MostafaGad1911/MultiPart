@@ -9,28 +9,53 @@
     android:background="@color/colorWhite"
     tools:context=".MainActivity">
 
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/Picked_img"
+        android:layout_width="@dimen/_110sdp"
+        android:layout_height="@dimen/_110sdp"
+        />
+
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/pickImg"
-        android:layout_width="@dimen/_110sdp"
+        android:layout_width="@dimen/_160sdp"
         android:layout_height="@dimen/_40sdp"
-        android:background="@color/colorBlueMidnight"
-        android:text="PICK IMG"
+        android:background="@color/colorGreen"
+        android:text="PICK Image"
         android:textColor="@color/colorWhite"
         android:textStyle="bold"
         android:textAllCaps="true"
-        />
+        android:layout_marginTop="@dimen/_20sdp"
+        android:drawableEnd="@drawable/ic_attachment"
+        android:paddingEnd="@dimen/_4sdp"
+        android:paddingRight="@dimen/_4sdp"
+        android:drawableRight="@drawable/ic_attachment" />
 
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/uploadImg"
-        android:layout_width="@dimen/_110sdp"
+        android:layout_width="@dimen/_160sdp"
         android:layout_height="@dimen/_40sdp"
-        android:background="@color/colorBlueMidnight"
+        android:background="@color/colorDarkRed"
         android:text="Upload"
         android:textColor="@color/colorWhite"
         android:textStyle="bold"
         android:textAllCaps="true"
         android:layout_marginTop="@dimen/_10sdp"
+        android:drawableEnd="@drawable/ic_upload"
+        android:paddingEnd="@dimen/_4sdp"
+        android:paddingRight="@dimen/_4sdp"
+        android:drawableRight="@drawable/ic_attachment"
         />
+
+    <com.crystal.crystalpreloaders.widgets.CrystalPreloader
+        android:id="@+id/loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:crs_pl_style="circular"
+        app:crs_pl_size="very_small"
+        android:visibility="invisible"
+        app:crs_pl_bg_color="@color/colorBlueMidnight"
+        android:layout_marginTop="@dimen/_10sdp"/>
+
 
 </LinearLayout>

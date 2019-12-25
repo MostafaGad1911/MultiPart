@@ -1,19 +1,19 @@
 package mostafa.projects.doctorjobs.Modules
 
 import android.content.Context
-import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import mostafa.projects.doctorjobs.Helper.Constants
 import mostafa.projects.multipart.Connection.UserClient
-import mostafa.projects.multipart.Model.FileInfo
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+
 
 @Module
 class Settings @Inject constructor(){
@@ -42,10 +42,14 @@ class Settings @Inject constructor(){
             .connectTimeout(100, TimeUnit.SECONDS)
             .readTimeout(100, TimeUnit.SECONDS).build()
 
+        val gson = GsonBuilder()
+            .setLenient()
+            .create()
+
         retrofit = Retrofit.Builder()
             .baseUrl(Constants.BASE_URL)
             .addConverterFactory(ScalarsConverterFactory.create())
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .client(client)
             .build()
 
