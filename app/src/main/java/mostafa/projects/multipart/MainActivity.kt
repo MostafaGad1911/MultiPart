@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import com.crystal.crystalpreloaders.widgets.CrystalPreloader
 import de.hdodenhof.circleimageview.CircleImageView
+import id.zelory.compressor.Compressor
 import mostafa.projects.dagger2.Component.DaggerMainComponent
 import mostafa.projects.dagger2.Component.MainComponent
 import mostafa.projects.multipart.Views.MainView
@@ -42,6 +43,7 @@ class MainActivity : AppCompatActivity(), MainView, View.OnClickListener {
     lateinit var mainComponent: MainComponent
     var filePath: String? = null
     var postPath: String? = null
+    lateinit var compressedFile:File
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -119,7 +121,8 @@ class MainActivity : AppCompatActivity(), MainView, View.OnClickListener {
                     return
                 } else {
                     val file = File(postPath!!)
-                    val requestBody = RequestBody.create(MediaType.parse("*/*"), file)
+                    compressedFile =  Compressor(this).compressToFile(file);
+                    val requestBody = RequestBody.create(MediaType.parse("*/*"), compressedFile)
                     val multipartBody: MultipartBody.Part =
                         MultipartBody.Part.createFormData("file", file.name, requestBody)
                     mainComponent.connect().getService().uploadFile(multipartBody)
