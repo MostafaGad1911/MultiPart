@@ -1,13 +1,16 @@
 package mostafa.projects.multipart
 
 import android.Manifest
+import android.annotation.TargetApi
 import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.ImageDecoder
 import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
@@ -15,6 +18,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import com.crystal.crystalpreloaders.widgets.CrystalPreloader
@@ -30,6 +34,7 @@ import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
 import java.io.File
+import java.net.URI
 
 
 class MainActivity : AppCompatActivity(), MainView, View.OnClickListener {
@@ -43,7 +48,8 @@ class MainActivity : AppCompatActivity(), MainView, View.OnClickListener {
     lateinit var mainComponent: MainComponent
     var filePath: String? = null
     var postPath: String? = null
-    lateinit var compressedFile:File
+    lateinit var compressedFile: File
+    lateinit var selectedImage:Uri
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -82,7 +88,7 @@ class MainActivity : AppCompatActivity(), MainView, View.OnClickListener {
                 return
             }
             if (data != null) {
-                val selectedImage = data.data
+                selectedImage = data.data!!
                 picked_img.setImageURI(selectedImage)
                 val filePathColumn = arrayOf(MediaStore.Images.Media.DATA)
                 val cursor =
@@ -121,7 +127,7 @@ class MainActivity : AppCompatActivity(), MainView, View.OnClickListener {
                     return
                 } else {
                     val file = File(postPath!!)
-                    compressedFile =  Compressor(this).compressToFile(file);
+                    compressedFile = Compressor(this).compressToFile(file);
                     val requestBody = RequestBody.create(MediaType.parse("*/*"), compressedFile)
                     val multipartBody: MultipartBody.Part =
                         MultipartBody.Part.createFormData("file", file.name, requestBody)
@@ -131,6 +137,7 @@ class MainActivity : AppCompatActivity(), MainView, View.OnClickListener {
                                 Log.w("UploadFile", t.message.toString())
                             }
 
+                            @RequiresApi(Build.VERSION_CODES.P)
                             override fun onResponse(
                                 call: Call<ResponseBody>,
                                 response: Response<ResponseBody>
@@ -142,7 +149,7 @@ class MainActivity : AppCompatActivity(), MainView, View.OnClickListener {
                                         "Uploaded successfully",
                                         Toast.LENGTH_SHORT
                                     ).show()
-                                    sendNotifications("Uploaded successfully")
+                                    sendNotifications("Uploaded successfully" , selectedImage)
                                 } else {
                                     hideLoading()
                                     Toast.makeText(
@@ -186,11 +193,16 @@ class MainActivity : AppCompatActivity(), MainView, View.OnClickListener {
         startActivityForResult(galleryIntent, IMAGE_PICK_CODE)
     }
 
-    fun sendNotifications(messageBody: String?) {
+    @TargetApi(Build.VERSION_CODES.P)
+    @RequiresApi(Build.VERSION_CODES.P)
+    fun sendNotifications(messageBody: String?, imageUri :Uri) {
         val channelId = "sample"
+        val source:ImageDecoder.Source = ImageDecoder.createSource(this.getContentResolver(), imageUri);
+        val bitmap = ImageDecoder.decodeBitmap(source)
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_upload_black)
+            .setLargeIcon(bitmap)
             .setContentTitle("MultiPart Sample")
             .setContentText(messageBody)
             .setAutoCancel(true)
