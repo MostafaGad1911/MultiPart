@@ -8,6 +8,8 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.media.RingtoneManager
 import android.net.Uri
@@ -33,8 +35,11 @@ import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
+import java.io.ByteArrayOutputStream
 import java.io.File
-import java.net.URI
+import java.io.InputStream
+import java.net.HttpURLConnection
+import java.net.URL
 
 
 class MainActivity : AppCompatActivity(), MainView, View.OnClickListener {
@@ -49,7 +54,7 @@ class MainActivity : AppCompatActivity(), MainView, View.OnClickListener {
     var filePath: String? = null
     var postPath: String? = null
     lateinit var compressedFile: File
-    lateinit var selectedImage:Uri
+    lateinit var selectedImage: Uri
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -133,8 +138,24 @@ class MainActivity : AppCompatActivity(), MainView, View.OnClickListener {
                         MultipartBody.Part.createFormData("file", file.name, requestBody)
                     mainComponent.connect().getService().uploadFile(multipartBody)
                         .enqueue(object : retrofit2.Callback<ResponseBody> {
+                            @RequiresApi(Build.VERSION_CODES.P)
                             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                                 Log.w("UploadFile", t.message.toString())
+                                val Icon = BitmapFactory.decodeResource(
+                                    getResources(),
+                                    R.drawable.ic_close
+                                );
+
+                                failedNotifications(
+                                    "Uploaded failed",
+                                    "https://23.235.203.248/~most3af9gad/uploads/close.png"
+                                )
+                                hideLoading()
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Uploaded failed",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
 
                             @RequiresApi(Build.VERSION_CODES.P)
@@ -149,8 +170,12 @@ class MainActivity : AppCompatActivity(), MainView, View.OnClickListener {
                                         "Uploaded successfully",
                                         Toast.LENGTH_SHORT
                                     ).show()
-                                    sendNotifications("Uploaded successfully" , selectedImage)
+                                    sendNotifications("Uploaded successfully", selectedImage)
                                 } else {
+                                    failedNotifications(
+                                        "Uploaded failed",
+                                        "https://23.235.203.248/~most3af9gad/uploads/close.png"
+                                    )
                                     hideLoading()
                                     Toast.makeText(
                                         this@MainActivity,
@@ -185,6 +210,15 @@ class MainActivity : AppCompatActivity(), MainView, View.OnClickListener {
         }
     }
 
+    fun getImageUriFromBitmap(context: Context, bitmap: Bitmap): Uri {
+        val bytes = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
+        val path =
+            MediaStore.Images.Media.insertImage(context.contentResolver, bitmap, "Title", null)
+        return Uri.parse(path.toString())
+
+    }
+
     fun pickImageFromGallery() {
         val galleryIntent = Intent(
             Intent.ACTION_PICK,
@@ -195,9 +229,10 @@ class MainActivity : AppCompatActivity(), MainView, View.OnClickListener {
 
     @TargetApi(Build.VERSION_CODES.P)
     @RequiresApi(Build.VERSION_CODES.P)
-    fun sendNotifications(messageBody: String?, imageUri :Uri) {
+    fun sendNotifications(messageBody: String?, imageUri: Uri) {
         val channelId = "sample"
-        val source:ImageDecoder.Source = ImageDecoder.createSource(this.getContentResolver(), imageUri);
+        val source: ImageDecoder.Source =
+            ImageDecoder.createSource(this.getContentResolver(), imageUri);
         val bitmap = ImageDecoder.decodeBitmap(source)
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
@@ -219,4 +254,29 @@ class MainActivity : AppCompatActivity(), MainView, View.OnClickListener {
         }
         notificationManager.notify(0, notificationBuilder.build())
     }
+
+    @TargetApi(Build.VERSION_CODES.P)
+    @RequiresApi(Build.VERSION_CODES.P)
+    fun failedNotifications(messageBody: String?, imageUri: String) {
+        val channelId = "sample"
+        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        val notificationBuilder = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_close)
+            .setContentTitle("MultiPart Sample")
+            .setContentText(messageBody)
+            .setAutoCancel(true)
+            .setSound(defaultSoundUri)
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                channelId,
+                "Channel human readable title",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            notificationManager.createNotificationChannel(channel)
+        }
+        notificationManager.notify(0, notificationBuilder.build())
+    }
+
 }
